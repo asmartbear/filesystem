@@ -34,11 +34,5 @@ npm run watch
 Prepare for release (e.g. run tests and bump version number):
 
 ```bash
-npm run release
-```
-
-Publish to npm:
-
-```bash
-npm publish
+npm run release && git push --follow-tags origin main && npm publish
 ```

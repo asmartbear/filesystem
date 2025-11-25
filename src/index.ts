@@ -2,16 +2,9 @@ import util from 'util';
 import fs, { createReadStream } from "fs"
 import os from "os";
 import path from "path"
-import { createHash, randomBytes } from 'crypto';
+import { createHash, randomUUID } from 'crypto';
 
 type MaybePromise<T> = T | Promise<T>
-
-/**
- * Returns a random hex string, not cryptographically secure.
- */
-function randomHexString(len: number): string {
-    return randomBytes(Math.ceil(len / 2)).toString('hex')
-}
 
 /** Meta-data about a path */
 export type PathInfo = {
@@ -91,7 +84,7 @@ export class Path {
     /**
      * The current user's HOME directory.
      */
-    static userHomeDir: Path = new Path(process.env.HOME ?? '/tmp')
+    static userHomeDir: Path = new Path(os.homedir())
 
     /**
      * Path to the void.
@@ -465,7 +458,7 @@ export class Path {
      */
     static getTempPath(prefix: string = "", suffix: string = "", dir: Path | null | undefined = undefined): Path {
         if (!dir) dir = Path.systemTempDir
-        return dir.join(`${prefix}${randomHexString(32)}${suffix}`);
+        return dir.join(`${prefix}${randomUUID()}${suffix}`);
     }
 
     /**
