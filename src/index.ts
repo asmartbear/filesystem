@@ -283,10 +283,19 @@ export class Path {
     }
 
     /**
-     * Read in the contents of this file as a string.
+     * Read in the contents of this file as a raw buffer.
      */
-    async readAsString(): Promise<string> {
-        return fs.promises.readFile(this.absPath, { encoding: "utf-8" })
+    async readAsBuffer(): Promise<Buffer> {
+        return fs.promises.readFile(this.absPath)
+    }
+
+    /**
+     * Read in the contents of this file as an encoded string.
+     * 
+     * Default is `UTF-8`, but for example `"base64"`.
+     */
+    async readAsString(encoding: BufferEncoding = "utf-8"): Promise<string> {
+        return fs.promises.readFile(this.absPath, { encoding })
     }
 
     /**
@@ -319,19 +328,19 @@ export class Path {
     }
 
     /**
-     * Writes file, creating parent directories if needed.
+     * Writes file, creating parent directories if needed, optionally with specific encoding (default `UTF-8`)
      */
-    async writeAsString(content: string): Promise<void> {
+    async writeAsString(content: string, encoding?: BufferEncoding): Promise<void> {
 
         // Write the file
         try {
-            await fs.promises.writeFile(this.absPath, content, { encoding: "utf8" });
+            await fs.promises.writeFile(this.absPath, content, { encoding });
         } catch (err: any) {
             // Check for parent directory needs to be created.  Don't do this ahead of time because nearly always
             // the parent does exist, and we save ourselves a round-trip to the filesystem.
             if (err?.code === "ENOENT") {
                 await fs.promises.mkdir(path.dirname(this.absPath), { recursive: true });
-                await fs.promises.writeFile(this.absPath, content, { encoding: "utf8" });
+                await fs.promises.writeFile(this.absPath, content, { encoding });
             } else {
                 throw err;
             }
