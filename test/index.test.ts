@@ -21,11 +21,35 @@ test('trivial utilities', () => {
     T.eq(p.parent.parent.parent.parent.absPath, "/")
 })
 
+test('trailing slashes on initialization are ignored', () => {
+    const p = new Path('/foo/')
+    T.eq(p.absPath, "/foo")
+})
+
+test('paths as Map keys', () => {
+    const m = new Map<Path, number>()
+    m.set(new Path("/foo"), 123)
+    m.set(new Path("/bar"), 321)
+    T.be(m.size, 2)
+    T.eq(Array.from(m).map(pair => [pair[0].absPath, pair[1]]), [["/foo", 123], ["/bar", 321]])
+})
+
+test('join', () => {
+    const j = (p: string, c: string) => new Path(p).join(c).absPath
+    T.be(j("/foo", ""), "/foo")
+    T.be(j("/foo", "bar"), "/foo/bar")
+    T.be(j("/foo", "/bar"), "/foo/bar")
+    T.be(j("/foo/", ""), "/foo")
+    T.be(j("/foo/", "bar"), "/foo/bar")
+    T.be(j("/foo/", "/bar"), "/foo/bar")
+})
+
 test('special paths', async () => {
     expect(Path.devNull.absPath).toEqual('/dev/null')
     expect(Path.userHomeDir.absPath).toEqual(USER_HOME_DIR)
     expect(await Path.userHomeDir.isDir()).toEqual(true)
     expect(await Path.systemTempDir.isDir()).toEqual(true)
+    T.be(Path.cwd().absPath, process.cwd())
 })
 
 test('CLI expand', () => {

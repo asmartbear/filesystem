@@ -66,6 +66,7 @@ export class Path {
     constructor(
         /**
          * The full path to the file, or another Path object to copy.
+         * Trailing slashes are ignored, and relative paths are converted to absolute using the current working directory.
          */
         absPath: string | Path,
         /**
@@ -102,6 +103,11 @@ export class Path {
         return new Path(p)
     }
 
+    /** Creates a path to the current working directory, which can change over the execution of the script. */
+    static cwd(): Path {
+        return new Path("")     // resolves to `process.cwd()` in Node (by unit-test), and does something "reasonable" in other contexts.
+    }
+
     toString(): string {
         return this.absPath
     }
@@ -112,11 +118,13 @@ export class Path {
 
     // For Map key equality
     [Symbol.toPrimitive](hint: string): string {
+        // istanbul ignore next
         return this.absPath;
     }
 
     // Define custom console output for Node.js
     [util.inspect.custom](): string {
+        // istanbul ignore next
         return this.absPath;
     }
 
@@ -158,6 +166,8 @@ export class Path {
 
     /**
      * Starting from this path, join any number of other path segments, and return a new `Path` object.
+     * If the additional paths start with a leading slash, they do _not_ reset the absolute path, but rather
+     * are still just concatenated.
      */
     join(...paths: (string | Path)[]): Path {
         return new Path(path.join(this.absPath, ...(paths.map(String))), this.callbacks)
