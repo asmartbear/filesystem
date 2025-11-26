@@ -24,6 +24,8 @@
     "postpublish": "git push origin main --follow-tags"
   },
   "devDependencies": {
+    "@asmartbear/simplified": "^1.0.8",
+    "@asmartbear/testutil": "^1.0.5",
     "@types/jest": "^30.0.0",
     "@types/mocha": "^10.0.10",
     "@types/node": "^24.10.1",

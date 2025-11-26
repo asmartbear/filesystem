@@ -174,17 +174,20 @@ export class Path {
     }
 
     /**
-     * Returns a path fragment relative to this path.
+     * Returns a path fragment relative to this path, without a leading slash.
+     * Empty string if the paths are identical.
+     * Uses '..' segments if the given path isn't a child, and thus needs more traversal to be reached from here.
      */
     relativeToMe(other: string | Path): string {
         return path.relative(this.absPath, String(other))
     }
 
     /**
-     * If the other (absolute) path has no parents in common with this one, or the only common path
+     * If the other path has no parents in common with this one, or the only common path
      * is the user's home directory, returns the absolute path.  Otherwise returns the path relative to our own.
      */
     maybeRelativeToMe(other: string | Path): string {
+        if (other instanceof Path) other = other.absPath
         const common = this.commonParent(other)
         if (common.absPath.length > 1 && common.absPath !== Path.userHomeDir.absPath) {
             return this.relativeToMe(other)
