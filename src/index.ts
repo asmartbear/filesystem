@@ -334,9 +334,32 @@ export class Path {
     }
 
     /**
-     * Writes file, creating parent directories if needed, optionally with specific encoding (default `UTF-8`)
+     * Writes file from a raw buffer, creating parent directories if needed.
      */
-    async writeAsString(content: string, encoding?: BufferEncoding): Promise<void> {
+    async write(content: Buffer): Promise<void> {
+
+        // Write the file
+        try {
+            await fs.promises.writeFile(this.absPath, content);
+        } catch (err: any) {
+            // Check for parent directory needs to be created.  Don't do this ahead of time because nearly always
+            // the parent does exist, and we save ourselves a round-trip to the filesystem.
+            if (err?.code === "ENOENT") {
+                await fs.promises.mkdir(path.dirname(this.absPath), { recursive: true });
+                await fs.promises.writeFile(this.absPath, content);
+            } else {
+                throw err;
+            }
+        }
+
+        // Eventually successful, so make callbacks.
+        await this.callbacks?.onPathWritten(this)
+    }
+
+    /**
+     * Writes file from a string, creating parent directories if needed, with specific encoding (default `UTF-8`)
+     */
+    async writeAsString(content: string, encoding: BufferEncoding = 'utf-8'): Promise<void> {
 
         // Write the file
         try {
