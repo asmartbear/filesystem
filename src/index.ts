@@ -281,11 +281,33 @@ export class Path {
     }
 
     /**
+     * True if this file is newer than the other file, or if the sizes don't match, or if either file doesn't exist.
+     */
+    isNewerThanSync(other: Path): boolean {
+        try {
+            const myStats = this.getInfoSync()
+            const otherStats = other.getInfoSync()
+            return myStats.size != otherStats.size || myStats.lastModifiedMs > otherStats.lastModifiedMs;
+        } catch {
+            return true
+        }
+    }
+
+    /**
      * Creates this path as a directory (and any parent directories as needed).
      */
     async mkdir(): Promise<void> {
         if (await this.isDir() !== true) {
             await fs.promises.mkdir(this.absPath, { recursive: true })
+        }
+    }
+
+    /**
+     * Creates this path as a directory (and any parent directories as needed).
+     */
+    mkdirSync(): void {
+        if (this.getInfoSync().isDir !== true) {
+            fs.mkdirSync(this.absPath, { recursive: true })
         }
     }
 
@@ -454,6 +476,14 @@ export class Path {
      */
     async unlink(): Promise<void> {
         await fs.promises.unlink(this.absPath)
+    }
+
+    /**
+     * Deletes this file, really unlinking from the current directory.  Errors if it wasn't
+     * possible to delete, or didn't exist.
+     */
+    unlinkSync(): void {
+        fs.unlinkSync(this.absPath)
     }
 
     /**
