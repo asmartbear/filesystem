@@ -3,6 +3,7 @@ import fs, { createReadStream } from "fs"
 import os from "os";
 import path from "path"
 import { createHash, randomUUID } from 'crypto';
+import { execFile } from 'child_process';
 
 type MaybePromise<T> = T | Promise<T>
 
@@ -561,6 +562,29 @@ export class Path {
             await tempFile.writeAsString(content)
             return true
         }, useDestDirectory)
+    }
+
+    /**
+     * Opens a Finder window revealing this file.
+     */
+    revealInFinder() {
+        execFile('open', ['-R', this.absPath])
+    }
+
+    /**
+     * Opens this file using the application that is associated with it; does not wait for that to happen before returning.
+     */
+    openInApplication() {
+        execFile('open', [this.absPath])
+    }
+
+    /**
+     * Opens a URL in the Default profile in the existing Chrome process; doesn't wait for it to happen before returning.
+     */
+    static openUrlInBrowser(url: string) {
+        // exec(`open '${url}'`);       // this works, but the one below is far better for our typical use-case
+        // Ref: https://peter.sh/experiments/chromium-command-line-switches/
+        execFile(`open`, [`-na`, `Google Chrome`, `--args`, `--new-window`, `--profile-directory="Default"`, url]);
     }
 
 }

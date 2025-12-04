@@ -168,3 +168,7 @@ test('temp path does not exist, but its directory does', async () => {
     T.be(await p.isDir(), false)
     T.be(await p.parent.isDir(), true)
 })
+
+// test('open something', () => {
+//     Path.userHomeDir.join('Downloads', 'Syllabus.pdf').revealInFinder()
+// })
